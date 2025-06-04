@@ -12,7 +12,7 @@ using Soenneker.Extensions.Task;
 namespace Soenneker.Email.Dispatcher;
 
 /// <inheritdoc cref="IEmailDispatcher"/>
-public sealed class EmailDispatcher: IEmailDispatcher
+public sealed class EmailDispatcher : IEmailDispatcher
 {
     private readonly IEmailUtil _emailUtil;
     private readonly IEmailSender _sender;
