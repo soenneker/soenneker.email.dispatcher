@@ -43,6 +43,6 @@
 
     <ItemGroup>
         <PackageReference Include="Soenneker.Email.Senders.Abstract" Version="3.0.8" />
-        <PackageReference Include="Soenneker.Email.Util" Version="3.0.168" />
+        <PackageReference Include="Soenneker.Email.Util" Version="3.0.170" />
     </ItemGroup>
 </Project>
