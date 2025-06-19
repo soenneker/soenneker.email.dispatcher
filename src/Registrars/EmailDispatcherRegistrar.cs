@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Soenneker.Email.Dispatcher.Abstract;
+using Soenneker.Email.Util.Registrars;
 
 namespace Soenneker.Email.Dispatcher.Registrars;
 
@@ -14,7 +15,7 @@ public static class EmailDispatcherRegistrar
     /// </summary>
     public static IServiceCollection AddEmailDispatcherAsSingleton(this IServiceCollection services)
     {
-        services.TryAddSingleton<IEmailDispatcher, EmailDispatcher>();
+        services.AddEmailUtilAsSingleton().TryAddSingleton<IEmailDispatcher, EmailDispatcher>();
 
         return services;
     }
@@ -24,7 +25,7 @@ public static class EmailDispatcherRegistrar
     /// </summary>
     public static IServiceCollection AddEmailDispatcherAsScoped(this IServiceCollection services)
     {
-        services.TryAddScoped<IEmailDispatcher, EmailDispatcher>();
+        services.AddEmailUtilAsScoped().TryAddScoped<IEmailDispatcher, EmailDispatcher>();
 
         return services;
     }
