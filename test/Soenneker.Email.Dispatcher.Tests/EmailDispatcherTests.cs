@@ -1,18 +1,17 @@
-﻿using Soenneker.Tests.FixturedUnit;
-using Xunit;
+using Soenneker.Tests.HostedUnit;
 
 namespace Soenneker.Email.Dispatcher.Tests;
 
-[Collection("Collection")]
-public sealed class EmailDispatcherTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public sealed class EmailDispatcherTests : HostedUnitTest
 {
 
-    public EmailDispatcherTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public EmailDispatcherTests(Host host) : base(host)
     {
 
     }
 
-    [Fact]
+    [Test]
     public void Default()
     {
 
