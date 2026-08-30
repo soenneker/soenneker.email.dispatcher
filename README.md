@@ -5,7 +5,7 @@
 
 # Soenneker.Email.Dispatcher
 
-Defines a contract for dispatching email messages, handling routing logic (e.g., queuing or direct sending) based on configuration settings.
+Routes an `EmailMessage` either to Azure Service Bus or directly to an `IEmailSender`, based on the `Email:UseQueue` configuration value.
 
 ## Install
 
@@ -13,35 +13,42 @@ Defines a contract for dispatching email messages, handling routing logic (e.g.,
 dotnet add package Soenneker.Email.Dispatcher
 ```
 
-## Quick start
+## Configure routing
 
-```csharp
-using Soenneker.Email.Dispatcher.Registrars;
-using Microsoft.Extensions.DependencyInjection;
-
-var services = new ServiceCollection();
-var result = services.AddEmailDispatcherAsSingleton();
+```json
+{
+  "Email": {
+    "UseQueue": false
+  }
+}
 ```
 
-Adds `IEmailDispatcher` as a singleton service.
+The value is required and is read when `EmailDispatcher` is constructed. Changing configuration afterward does not change an existing dispatcher's route.
 
-## What you get
+Register an `IEmailSender`, then choose the dispatcher lifetime that matches the consuming application:
 
-- `IEmailDispatcher` — Defines a contract for dispatching email messages, handling routing logic (e.g., queuing or direct sending) based on configuration settings.
-- `EmailDispatcherRegistrar` — Determines email dispatching/routing.
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+using Soenneker.Email.Dispatcher.Abstract;
+using Soenneker.Email.Dispatcher.Registrars;
+using Soenneker.Email.Senders.Abstract;
 
-## API at a glance
+services.AddSingleton<IEmailSender, AppEmailSender>();
+services.AddEmailDispatcherAsSingleton();
+```
 
-| API | What it does | Result / important behavior |
-| --- | --- | --- |
-| `IEmailDispatcher.Dispatch(emailMessage, cancellationToken)` | Dispatches the specified `emailMessage` for delivery. Depending on configuration, the message may be placed on a queue or sent immediately via the underlying email sender. | A `ValueTask` that represents the asynchronous dispatch operation. |
-| `EmailDispatcherRegistrar.AddEmailDispatcherAsSingleton(services)` | Adds `IEmailDispatcher` as a singleton service. | The same service collection, so additional registrations can be chained. |
-| `EmailDispatcherRegistrar.AddEmailDispatcherAsScoped(services)` | Adds `IEmailDispatcher` as a scoped service. | The same service collection, so additional registrations can be chained. |
+The singleton registration also registers the queue utility as singleton. Its `IEmailSender` dependency must be safe to capture and use for the application lifetime. Use `AddEmailDispatcherAsScoped()` with a scoped sender when dispatch behavior depends on request-scoped services.
 
-## Important behavior
+Both registrations add the email utility and its Service Bus transmitter dependencies. An `IEmailSender` registration is still required even when queue routing is enabled because the dispatcher receives both routes through its constructor.
 
-- `IEmailDispatcher.Dispatch(emailMessage, cancellationToken)`: Thrown if `emailMessage` is `null`. Thrown if the dispatcher is not properly configured or if sending fails due to misconfiguration.
+## Dispatch a message
 
-## Practical notes
+```csharp
+IEmailDispatcher dispatcher = serviceProvider.GetRequiredService<IEmailDispatcher>();
 
-- Cancellation stops pending work; it does not undo work that has already completed.
+await dispatcher.Dispatch(message, cancellationToken);
+```
+
+With `UseQueue: true`, completion means the message was accepted by the configured Service Bus transmitter; delivery occurs later. With `UseQueue: false`, completion means the sender returned `true`. A `false` result from the sender becomes an `InvalidOperationException` so a failed direct send is not silently treated as success.
+
+Cancellation stops pending work when the underlying route observes the token; it cannot retract a message already queued or sent.

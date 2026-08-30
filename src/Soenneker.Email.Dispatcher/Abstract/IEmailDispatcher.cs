@@ -25,11 +25,8 @@ public interface IEmailDispatcher
     /// <returns>
     /// A <see cref="ValueTask"/> that represents the asynchronous dispatch operation.
     /// </returns>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown if <paramref name="emailMessage"/> is <c>null</c>.
-    /// </exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown if the dispatcher is not properly configured or if sending fails due to misconfiguration.
+    /// Thrown when direct delivery is selected and the configured sender reports that the message was not sent.
     /// </exception>
     ValueTask Dispatch(EmailMessage emailMessage, CancellationToken cancellationToken = default);
 }

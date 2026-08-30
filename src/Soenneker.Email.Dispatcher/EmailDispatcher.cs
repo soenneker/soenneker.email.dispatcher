@@ -8,10 +8,10 @@ using Soenneker.Extensions.Configuration;
 using Soenneker.Messages.Email;
 using Soenneker.Extensions.ValueTask;
 using Soenneker.Extensions.Task;
+using System;
 
 namespace Soenneker.Email.Dispatcher;
 
-/// <inheritdoc cref="IEmailDispatcher"/>
 public sealed class EmailDispatcher : IEmailDispatcher
 {
     private readonly IEmailUtil _emailUtil;
@@ -35,7 +35,10 @@ public sealed class EmailDispatcher : IEmailDispatcher
         }
         else
         {
-            await _sender.Send(emailMessage, cancellationToken).NoSync();
+            bool sent = await _sender.Send(emailMessage, cancellationToken).NoSync();
+
+            if (!sent)
+                throw new InvalidOperationException("The configured email sender reported that the message was not sent.");
         }
     }
 }
