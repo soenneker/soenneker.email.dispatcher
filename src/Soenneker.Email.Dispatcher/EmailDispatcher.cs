@@ -12,6 +12,7 @@ using System;
 
 namespace Soenneker.Email.Dispatcher;
 
+/// <inheritdoc cref="IEmailDispatcher" />
 public sealed class EmailDispatcher : IEmailDispatcher
 {
     private readonly IEmailUtil _emailUtil;
