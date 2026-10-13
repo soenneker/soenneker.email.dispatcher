@@ -25,7 +25,7 @@ public sealed class EmailDispatcher : IEmailDispatcher
         _emailUtil = emailUtil;
         _sender = sender;
 
-        _useQueue = configuration.GetValueStrict<bool>("Email:UseQueue");
+        _useQueue = bool.Parse(configuration.GetStringStrict("Email:UseQueue"));
     }
 
     public async ValueTask Dispatch(EmailMessage emailMessage, CancellationToken cancellationToken = default)
